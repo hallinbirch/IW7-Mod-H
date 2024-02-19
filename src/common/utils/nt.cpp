@@ -215,6 +215,9 @@ namespace utils::nt
 
 	bool is_wine()
 	{
+		return true;
+	}
+	/*{
 		static const auto has_wine_export = []() -> bool
 		{
 			const library ntdll("ntdll.dll");
@@ -222,7 +225,7 @@ namespace utils::nt
 		}();
 
 		return has_wine_export;
-	}
+	}*/
 
 	bool is_shutdown_in_progress()
 	{
