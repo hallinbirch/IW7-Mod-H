@@ -484,7 +484,8 @@ namespace updater
 		}
 	};
 }
-
+/*
 #if GIT_DIRTY == 0
 REGISTER_COMPONENT(updater::component)
 #endif
+*/
