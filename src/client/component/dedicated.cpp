@@ -50,26 +50,22 @@ namespace dedicated
 			return startup_command_queue;
 		}
 
-		void execute_startup_command(int client, int /*controllerIndex*/, const char* command)
+		void execute_startup_commands()
 		{
-			if (game::Live_SyncOnlineDataFlags(0) == 0)
-			{
-				game::Cbuf_ExecuteBufferInternal(0, 0, command, game::Cmd_ExecuteSingleCommand);
-			}
-			else
-			{
-				get_startup_command_queue().emplace_back(command);
-			}
-		}
+			auto& com_num_console_lines = *game::com_num_console_lines;
+			auto* com_console_lines = game::com_console_lines.get();
 
-		void execute_startup_command_queue()
-		{
-			const auto queue = get_startup_command_queue();
-			get_startup_command_queue().clear();
-
-			for (const auto& command : queue)
+			for (auto i = 0; i < com_num_console_lines; i++)
 			{
-				game::Cbuf_ExecuteBufferInternal(0, 0, command.data(), game::Cmd_ExecuteSingleCommand);
+				auto cmd = com_console_lines[i];
+
+				// if command is map or map_rotate, its already been called
+				if (cmd == "map"s || cmd == "map_rotate"s)
+				{
+					continue;
+				}
+
+				game::Cbuf_ExecuteBufferInternal(0, 0, cmd, game::Cmd_ExecuteSingleCommand);
 			}
 		}
 
@@ -255,7 +251,7 @@ namespace dedicated
 			dvars::override::register_bool("intro", false, game::DVAR_FLAG_READ);
 
 			// Stop crashing from sys_errors
-			utils::hook::jump(0x140D34180, sys_error_stub, true);
+			//utils::hook::jump(0x140D34180, sys_error_stub, true);
 
 			// Is party dedicated
 			utils::hook::jump(0x1405DFC10, party_is_server_dedicated_stub);
@@ -267,9 +263,6 @@ namespace dedicated
 			utils::hook::call(0x1403428B1, sync_gpu_stub);
 
 			utils::hook::jump(0x140341B60, init_dedicated_server, true);
-
-			// delay startup commands until the initialization is done
-			utils::hook::call(0x140B8D20F, execute_startup_command);
 
 			utils::hook::set<uint32_t>(0x140B21107 + 2, 0x482); // g_gametype flags
 			utils::hook::set<uint32_t>(0x140B21137 + 2, 0x480); // g_hardcore flags
@@ -308,12 +301,32 @@ namespace dedicated
 			// check the sounddata when server is launched
 			start_server_hook.create(0x140C56050, start_server_stub);
 
-			// IMAGE patches
-			// image stream (pak)
+			// AlwaysLoaded
+			utils::hook::set<uint8_t>(0x140A81D40, 0xC3);
+
+			// remove imagefile load
 			utils::hook::set<uint8_t>(0x140A7DB10, 0xC3); // DB_CreateGfxImageStreamInternal
+			utils::hook::set<uint8_t>(0x140E01F00, 0xC3); // Load_Texture
+
+			// remove assetfile load
+			//utils::hook::jump(0x1409E762F, 0x1409E7713);
+			//utils::hook::set<uint8_t>(0x1403BA0A0, 0xC3);
+			//utils::hook::jump(0x140571E5F, 0x140571EF0);
+
+			// remove transient loads
+			utils::hook::set<uint8_t>(0x140A79AE0, 0xC3);
+			utils::hook::set<uint8_t>(0x1403BB990, 0xC3);
+			utils::hook::set<uint8_t>(0x140A78910, 0xC3);
+
+			// remove emblem stuff
+			utils::hook::set<uint8_t>(0x14003B9A0, 0xC3);
+
+			// remove customization xmodel stuff
+			utils::hook::set<uint8_t>(0x1405D0690, 0xC3);
 
 			// UI patches
 			utils::hook::set<uint8_t>(0x140615090, 0xC3); // LUI_CoD_Init
+			utils::hook::set<uint8_t>(0x140348A90, 0xC3); // CL_InitUI
 
 			// IW7 patches
 			utils::hook::set(0x140E06060, 0xC3C033); // directx
@@ -397,7 +410,7 @@ namespace dedicated
 				// remove disconnect command
 				game::Cmd_RemoveCommand("disconnect");
 
-				execute_startup_command_queue();
+				execute_startup_commands();
 
 				// Send heartbeat to dpmaster
 				scheduler::once(send_heartbeat, scheduler::pipeline::server);

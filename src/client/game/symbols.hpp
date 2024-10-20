@@ -125,6 +125,7 @@ namespace game
 	WEAK symbol<const char* (dvar_t* dvar, DvarValue value)> Dvar_ValueToString{ 0x140CEED00 };
 	WEAK symbol<void(dvar_t* dvar, DvarSetSource source)> Dvar_Reset{ 0x140CEC490 };
 	WEAK symbol<unsigned int(const char* name)> Dvar_GenerateChecksum{ 0x140CEA520 };
+	WEAK symbol<void(dvar_t* dvar, bool value)> Dvar_SetBool{ 0x140CEC7D0 };
 	WEAK symbol<void(dvar_t* dvar, int value)> Dvar_SetInt{ 0x140CED3D0 };
 	WEAK symbol<void(dvar_t* dvar, float value)> Dvar_SetFloat{ 0x140CECD90 };
 	WEAK symbol<void(bool cheatOverride)> Dvar_OverrideCheatProtection{ 0x140CEB250 };
@@ -166,6 +167,8 @@ namespace game
 	WEAK symbol<void(const char* fmt, ...)> LUI_Interface_DebugPrint{ 0x14061C43F };
 	WEAK symbol<void()> LUI_EnterCriticalSection{ 0x140600080 };
 	WEAK symbol<void()> LUI_LeaveCriticalSection{ 0x140602280 };
+	WEAK symbol<unsigned short(const unsigned short parentNodeIndex, const char* path)> LUI_Model_CreateModelFromPath{ 0x1404EBF30 };
+	WEAK symbol<void(const unsigned short nodeIndex, const char* newValue)> LUI_Model_SetString{ 0x1404ECE90 };
 
 	WEAK symbol<unsigned int(int controllerIndex)> Live_SyncOnlineDataFlags{ 0x140DC5CE0 };
 	WEAK symbol<std::uint64_t(int controllerIndex)> Live_GetXuid{ 0x140D32A20 };
@@ -375,6 +378,9 @@ namespace game
 	WEAK symbol<int> gameTime{ 0x143C986D8 };
 
 	WEAK symbol<int> com_frameTime{ 0x1460053C0 };
+
+	WEAK symbol<int> com_num_console_lines{ 0x146006DB0 };
+	WEAK symbol<char*> com_console_lines{ 0x146006DC0 };
 
 	WEAK symbol<int> s_frontEndScene_state{ 0x144BFF608 };
 

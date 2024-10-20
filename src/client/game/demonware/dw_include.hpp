@@ -13,4 +13,6 @@ using namespace game::demonware;
 #include "reply.hpp"
 #include "service.hpp"
 
+#include "loot/loot.hpp"
+
 #include "services.hpp"

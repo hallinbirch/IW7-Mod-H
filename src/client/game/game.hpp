@@ -2,7 +2,7 @@
 
 #include "structs.hpp"
 
-#define PROTOCOL 1
+#define PROTOCOL 2
 
 namespace game
 {
@@ -45,6 +45,7 @@ namespace game
 	{
 		void client_println(int client_num, const std::string& text);
 		bool cheats_ok(int client_num = 0, bool print = false);
+		void menu_error(const std::string& error);
 	}
 
 	int Cmd_Argc();
